@@ -2,7 +2,7 @@ import { useAppStore } from './presentation/store/app-store.ts';
 import { ContainerProvider } from './presentation/store/container.tsx';
 import { AppShell } from './presentation/components/layout/AppShell.tsx';
 import { MarketplacePage } from './presentation/pages/MarketplacePage.tsx';
-import { AgentBuilderPage } from './presentation/pages/AgentBuilderPage.tsx';
+import { SystemComposerPage } from './presentation/pages/SystemComposerPage.tsx';
 import { DashboardPage } from './presentation/pages/DashboardPage.tsx';
 import { ProtocolExplorerPage } from './presentation/pages/ProtocolExplorerPage.tsx';
 
@@ -12,7 +12,7 @@ function AppContent() {
   return (
     <AppShell>
       {currentView === 'marketplace' && <MarketplacePage />}
-      {currentView === 'builder' && <AgentBuilderPage />}
+      {currentView === 'builder' && <SystemComposerPage />}
       {currentView === 'dashboard' && <DashboardPage />}
       {currentView === 'explorer' && <ProtocolExplorerPage />}
     </AppShell>

@@ -22,6 +22,7 @@ import type {
 } from '../../domain/ports/builder.port.ts';
 import { agentToGovernedSystemSpec } from '../contract/agent-to-spec.ts';
 import type { GovernedSystemSpec } from '../contract/governed-system-spec.ts';
+import { validateGovernedSystemSpec } from '../contract/governed-system-spec.validator.ts';
 
 export interface ProvisionResponse {
   readonly rootVaidId: string;
@@ -29,6 +30,32 @@ export interface ProvisionResponse {
   readonly operatorVaidId: string;
   readonly rootRole: string;
   readonly permittedChildren: { role: string; scopeBoundary: string[] }[];
+}
+
+/**
+ * Provision a fully-composed GovernedSystemSpec (Part B "Build"). Validates
+ * against the schema first (compose-time guard, B4) so an illegal shape never
+ * reaches the engine, then POSTs to the provisioning engine.
+ */
+export async function provisionSystem(
+  provisionUrl: string,
+  spec: GovernedSystemSpec,
+): Promise<ProvisionResponse> {
+  const errors = validateGovernedSystemSpec(spec);
+  if (errors.length > 0) {
+    throw new Error(
+      `spec is invalid; refusing to provision: ${errors.map((e) => e.message).join('; ')}`,
+    );
+  }
+  const res = await fetch(provisionUrl, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(spec),
+  });
+  if (!res.ok) {
+    throw new Error(`provision failed: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`);
+  }
+  return (await res.json()) as ProvisionResponse;
 }
 
 const STAGE_FLOW: { stage: BuildStage; message: string }[] = [
