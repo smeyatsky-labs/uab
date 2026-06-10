@@ -131,9 +131,13 @@ export function SystemComposerPage() {
   const { systemName, tenantId, roles, status, error, setSystemName, setTenantId, addRole, setStatus } = state;
   const errors = useMemo(() => composerErrors(state), [state]);
   const [provisionResult, setProvisionResult] = useState<unknown | null>(null);
+  // Demo operator token is entered at runtime and kept in localStorage, never
+  // baked into the public bundle (so viewing the hosted UI does not leak it).
+  const [operatorToken, setOperatorToken] = useState<string>(
+    () => localStorage.getItem('forgeOperatorToken') ?? '',
+  );
 
   const provisionUrl = import.meta.env.VITE_FORGE_PROVISION_URL;
-  const provisionToken = import.meta.env.VITE_FORGE_PROVISION_TOKEN;
 
   const handleProvision = async () => {
     if (errors.length > 0) return;
@@ -143,7 +147,10 @@ export function SystemComposerPage() {
       if (!provisionUrl) {
         throw new Error('VITE_FORGE_PROVISION_URL not set — set it to provision against the live engine');
       }
-      const result = await provisionSystem(provisionUrl, spec, provisionToken);
+      if (!operatorToken) {
+        throw new Error('Enter the demo operator token below to provision.');
+      }
+      const result = await provisionSystem(provisionUrl, spec, operatorToken);
       setProvisionResult(result);
       setStatus('done', { result });
     } catch (e) {
@@ -226,6 +233,20 @@ export function SystemComposerPage() {
               </ul>
             )}
           </GlassPanel>
+
+          <label className="block space-y-1 text-xs">
+            <span className="text-gray-500">Demo operator token (kept in your browser only)</span>
+            <input
+              type="password"
+              className="w-full rounded bg-white/5 px-2 py-1 font-mono"
+              value={operatorToken}
+              placeholder="paste the demo operator token"
+              onChange={(e) => {
+                setOperatorToken(e.target.value);
+                localStorage.setItem('forgeOperatorToken', e.target.value);
+              }}
+            />
+          </label>
 
           <NeonButton
             onClick={handleProvision}
