@@ -13,8 +13,23 @@ import type { CommercePort } from '../../domain/ports/commerce.port.ts';
 import { LocalStorageAgentRepo } from '../adapters/local-storage-agent.repo.ts';
 import { InMemoryProtocolRegistry } from '../adapters/inmemory-protocol-registry.ts';
 import { MockBuilderService } from '../mock/mock-builder.service.ts';
+import { ForgeProvisioningBuilderService } from '../adapters/forge-provisioning-builder.service.ts';
 import { MockMetricsService } from '../mock/mock-metrics.service.ts';
 import { MockCommerceService } from '../mock/mock-commerce.service.ts';
+
+/**
+ * Select the BuilderPort implementation. When VITE_FORGE_PROVISION_URL is set,
+ * use the real forge-agents provisioning engine (demo/single-operator posture);
+ * otherwise fall back to the mock so offline dev keeps working.
+ */
+function createBuilder(): BuilderPort {
+  const url = import.meta.env.VITE_FORGE_PROVISION_URL;
+  if (url) {
+    const tenant = import.meta.env.VITE_FORGE_TENANT_ID ?? 'demo-tenant';
+    return new ForgeProvisioningBuilderService(url, tenant);
+  }
+  return new MockBuilderService();
+}
 
 export interface Container {
   agentRepo: AgentRepoPort;
@@ -32,7 +47,7 @@ export function createContainer(): Container {
   instance = {
     agentRepo: new LocalStorageAgentRepo(),
     protocolRegistry: new InMemoryProtocolRegistry(),
-    builder: new MockBuilderService(),
+    builder: createBuilder(),
     metrics: new MockMetricsService(),
     commerce: new MockCommerceService(),
   };
