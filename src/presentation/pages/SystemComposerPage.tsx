@@ -133,6 +133,7 @@ export function SystemComposerPage() {
   const [provisionResult, setProvisionResult] = useState<unknown | null>(null);
 
   const provisionUrl = import.meta.env.VITE_FORGE_PROVISION_URL;
+  const provisionToken = import.meta.env.VITE_FORGE_PROVISION_TOKEN;
 
   const handleProvision = async () => {
     if (errors.length > 0) return;
@@ -142,7 +143,7 @@ export function SystemComposerPage() {
       if (!provisionUrl) {
         throw new Error('VITE_FORGE_PROVISION_URL not set — set it to provision against the live engine');
       }
-      const result = await provisionSystem(provisionUrl, spec);
+      const result = await provisionSystem(provisionUrl, spec, provisionToken);
       setProvisionResult(result);
       setStatus('done', { result });
     } catch (e) {
