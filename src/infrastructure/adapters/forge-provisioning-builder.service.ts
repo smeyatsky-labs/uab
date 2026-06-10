@@ -25,11 +25,13 @@ import type { GovernedSystemSpec } from '../contract/governed-system-spec.ts';
 import { validateGovernedSystemSpec } from '../contract/governed-system-spec.validator.ts';
 
 export interface ProvisionResponse {
+  readonly status: string;
   readonly rootVaidId: string;
   readonly tenantId: string;
   readonly operatorVaidId: string;
   readonly rootRole: string;
   readonly permittedChildren: { role: string; scopeBoundary: string[] }[];
+  readonly agentUrl?: string;
 }
 
 /**
@@ -40,20 +42,28 @@ export interface ProvisionResponse {
 export async function provisionSystem(
   provisionUrl: string,
   spec: GovernedSystemSpec,
+  token?: string,
 ): Promise<ProvisionResponse> {
+  // Browser-side validation is UX. The server re-validates and is the real gate;
+  // we still pre-check here to give immediate feedback before the round trip.
   const errors = validateGovernedSystemSpec(spec);
   if (errors.length > 0) {
     throw new Error(
       `spec is invalid; refusing to provision: ${errors.map((e) => e.message).join('; ')}`,
     );
   }
+  const headers: Record<string, string> = { 'content-type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const res = await fetch(provisionUrl, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers,
     body: JSON.stringify(spec),
   });
   if (!res.ok) {
-    throw new Error(`provision failed: HTTP ${res.status} ${(await res.text()).slice(0, 300)}`);
+    const body = await res.text();
+    // Surface the SERVER-side rejection (422 from the canonical schema) verbatim.
+    throw new Error(`provision rejected by server: HTTP ${res.status} ${body.slice(0, 400)}`);
   }
   return (await res.json()) as ProvisionResponse;
 }
