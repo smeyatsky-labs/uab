@@ -68,6 +68,8 @@ export function SyntheraProofPanel() {
   const [baseline, setBaseline] = useState<GovernedSnapshot | null>(null);
   const [engineResult, setEngineResult] = useState<string | null>(null);
   const [engineBusy, setEngineBusy] = useState(false);
+  const [denial, setDenial] = useState<string | null>(null);
+  const [denialBusy, setDenialBusy] = useState(false);
 
   const current = useMemo(
     () => (role ? governedSnapshot(role, delegations) : null),
@@ -103,6 +105,37 @@ export function SyntheraProofPanel() {
       setEngineResult(e instanceof Error ? e.message : String(e));
     } finally {
       setEngineBusy(false);
+    }
+  };
+
+  // The REAL substrate denial: hit /probe/over-envelope, which mints a real root
+  // server-side and drives the gate2 mint_child path so the substrate itself
+  // (mint_vaid.rs) denies the over-scope child. This is the genuine attenuation
+  // denial, not the /provision schema mirror.
+  const triggerLiveSubstrateDenial = async () => {
+    const provisionUrl = import.meta.env.VITE_FORGE_PROVISION_URL;
+    const token = localStorage.getItem('forgeOperatorToken') ?? '';
+    if (!provisionUrl) { setDenial('VITE_FORGE_PROVISION_URL not set — cannot reach the live engine.'); return; }
+    if (!token) { setDenial('No demo operator token — enter it in the composer first.'); return; }
+    const probeUrl = provisionUrl.replace(/\/provision$/, '/probe/over-envelope');
+    setDenialBusy(true);
+    setDenial(null);
+    try {
+      const res = await fetch(probeUrl, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ tenant: tenantId }),
+      });
+      if (res.status === 404) {
+        setDenial('Probe endpoint not deployed yet (HTTP 404). Deploy the forge-provisioning service with /probe/over-envelope, then retry.');
+        return;
+      }
+      const body = await res.text();
+      setDenial(`HTTP ${res.status} — ${body.slice(0, 700)}`);
+    } catch (e) {
+      setDenial(e instanceof Error ? e.message : String(e));
+    } finally {
+      setDenialBusy(false);
     }
   };
 
@@ -204,18 +237,34 @@ export function SyntheraProofPanel() {
           )}
         </div>
 
-        <div className="mt-3">
-          <NeonButton variant="ghost" onClick={verifyAgainstLiveEngine} loading={engineBusy}>
-            Verify against the live engine
-          </NeonButton>
-          {engineResult && (
-            <pre className="mt-2 overflow-auto rounded bg-black/30 p-2 text-[10px] text-gray-300">{engineResult}</pre>
-          )}
-          <p className="mt-2 text-[10px] text-gray-600">
-            The live engine returns its real canonical-schema rejection (server 422), which mirrors the
-            substrate attenuation rule. The substrate&apos;s mint-time denial proper (mint_vaid.rs) is a
-            runtime event in the deployed agent&apos;s spawn — gate2-proven, no browser surface.
-          </p>
+        <div className="mt-3 space-y-3">
+          {/* Mirror #1: the engine's canonical-schema gate (server 422). */}
+          <div>
+            <NeonButton variant="ghost" onClick={verifyAgainstLiveEngine} loading={engineBusy}>
+              Verify against the live engine (schema gate)
+            </NeonButton>
+            {engineResult && (
+              <pre className="mt-2 overflow-auto rounded bg-black/30 p-2 text-[10px] text-gray-300">{engineResult}</pre>
+            )}
+            <p className="mt-1 text-[10px] text-gray-600">
+              Real server-side canonical-schema rejection (422) — mirrors the substrate attenuation rule.
+            </p>
+          </div>
+
+          {/* The REAL thing: the substrate's own mint_vaid.rs attenuation denial. */}
+          <div>
+            <NeonButton variant="ghost" onClick={triggerLiveSubstrateDenial} loading={denialBusy}>
+              Trigger the live substrate denial (mint_vaid.rs)
+            </NeonButton>
+            {denial && (
+              <pre className="mt-2 overflow-auto rounded bg-black/30 p-2 text-[10px] text-red-300">{denial}</pre>
+            )}
+            <p className="mt-1 text-[10px] text-gray-600">
+              The genuine runtime denial: the engine mints a real root server-side, then drives the gate2
+              mint_child path so the SUBSTRATE itself denies an over-scope child. Returns the literal
+              mint_vaid.rs verdict (denied / substrateMessage). Not a mirror — the real attenuation denial.
+            </p>
+          </div>
         </div>
       </div>
     </GlassPanel>
