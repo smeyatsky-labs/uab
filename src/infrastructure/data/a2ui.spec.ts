@@ -51,6 +51,6 @@ export const a2uiSpec: ProtocolSpec = {
   },
   defaultConfig: { supportedComponents: ['text', 'card', 'list'], maxRenderDepth: 5, enableStreaming: true, progressiveRendering: true, optimisticUpdates: false, themeMode: 'dark', accessibilityLevel: 'aa' },
   exampleConfig: { supportedComponents: ['text', 'card', 'list', 'form', 'chart', 'table', 'media', 'action'], maxRenderDepth: 10, enableStreaming: true, progressiveRendering: true, optimisticUpdates: true, themeMode: 'dark', accessibilityLevel: 'aaa' },
-  capabilities: ['Declarative UI', 'Streaming Rendering', 'Component Composition', 'Progressive Updates', 'Theme Support', 'Accessibility'],
+  protocolFeatures: ['Declarative UI', 'Streaming Rendering', 'Component Composition', 'Progressive Updates', 'Theme Support', 'Accessibility'],
   useCases: ['Agent dashboard UIs', 'Dynamic form generation', 'Data visualization', 'Interactive reports'],
 };

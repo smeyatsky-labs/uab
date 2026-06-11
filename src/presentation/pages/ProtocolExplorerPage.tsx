@@ -114,7 +114,7 @@ export function ProtocolExplorerPage() {
                     </p>
 
                     <div className="mb-3 flex flex-wrap gap-1">
-                      {spec.capabilities.slice(0, 4).map((cap) => (
+                      {spec.protocolFeatures.slice(0, 4).map((cap) => (
                         <span
                           key={cap}
                           className="rounded-full border border-white/5 bg-white/[0.02] px-2 py-0.5 text-[10px] text-gray-500"
@@ -122,8 +122,8 @@ export function ProtocolExplorerPage() {
                           {cap}
                         </span>
                       ))}
-                      {spec.capabilities.length > 4 && (
-                        <span className="text-[10px] text-gray-600">+{spec.capabilities.length - 4}</span>
+                      {spec.protocolFeatures.length > 4 && (
+                        <span className="text-[10px] text-gray-600">+{spec.protocolFeatures.length - 4}</span>
                       )}
                     </div>
 

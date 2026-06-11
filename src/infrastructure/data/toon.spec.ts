@@ -53,6 +53,6 @@ export const toonSpec: ProtocolSpec = {
   },
   defaultConfig: { autoNegotiate: false, maxRounds: 5, concessionRate: 0.1, walkAwayThreshold: 0.6, defaultBudget: 100, defaultLatencyMs: 200, defaultSlaUptime: 99.5, trustedParties: [], arbitrationEnabled: true },
   exampleConfig: { autoNegotiate: true, maxRounds: 10, concessionRate: 0.15, walkAwayThreshold: 0.7, defaultBudget: 5000, defaultLatencyMs: 100, defaultSlaUptime: 99.95, trustedParties: ['agent_001', 'agent_002'], arbitrationEnabled: true },
-  capabilities: ['Multi-Party Negotiation', 'Budget Terms', 'Latency SLAs', 'Trust Scoring', 'Contract Templates', 'Dispute Arbitration'],
+  protocolFeatures: ['Multi-Party Negotiation', 'Budget Terms', 'Latency SLAs', 'Trust Scoring', 'Contract Templates', 'Dispute Arbitration'],
   useCases: ['Agent service agreements', 'SLA negotiation', 'Multi-agent task bidding', 'Resource allocation contracts'],
 };

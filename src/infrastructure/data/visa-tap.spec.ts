@@ -52,6 +52,6 @@ export const visaTapSpec: ProtocolSpec = {
   },
   defaultConfig: { organizationId: '', verificationLevel: 'standard', cloudflareIntegration: true, challengeResponse: true, tokenRefreshInterval: 60, regions: ['US'], gdprCompliant: false, dataRetentionDays: 90 },
   exampleConfig: { organizationId: 'org_visa_premium_001', verificationLevel: 'premium', cloudflareIntegration: true, challengeResponse: true, tokenRefreshInterval: 15, regions: ['US', 'EU', 'UK'], gdprCompliant: true, dataRetentionDays: 365 },
-  capabilities: ['Agent Identity Verification', 'Cryptographic Challenges', 'Bot Detection', 'Cloudflare Integration', 'Multi-Region Compliance', 'Trust Scoring'],
+  protocolFeatures: ['Agent Identity Verification', 'Cryptographic Challenges', 'Bot Detection', 'Cloudflare Integration', 'Multi-Region Compliance', 'Trust Scoring'],
   useCases: ['Secure checkout verification', 'Agent identity attestation', 'Fraud prevention', 'Merchant trust networks'],
 };

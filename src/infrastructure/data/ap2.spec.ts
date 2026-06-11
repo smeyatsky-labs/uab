@@ -53,6 +53,6 @@ export const ap2Spec: ProtocolSpec = {
   },
   defaultConfig: { paymentMethods: ['card'], settlementCurrency: 'USD', maxPerTransaction: 1000, maxDaily: 5000, maxMonthly: 50000, requireHumanApproval: true, approvalThreshold: 50, fraudDetection: true, auditLogging: true },
   exampleConfig: { paymentMethods: ['card', 'digital-wallet'], settlementCurrency: 'USD', maxPerTransaction: 10000, maxDaily: 50000, maxMonthly: 500000, requireHumanApproval: false, approvalThreshold: 500, fraudDetection: true, auditLogging: true },
-  capabilities: ['Multi-Method Payments', 'Transaction Limits', 'Human-in-the-Loop', 'Fraud Detection', 'Audit Logging', 'Tokenization'],
+  protocolFeatures: ['Multi-Method Payments', 'Transaction Limits', 'Human-in-the-Loop', 'Fraud Detection', 'Audit Logging', 'Tokenization'],
   useCases: ['Autonomous purchasing agents', 'Subscription payments', 'B2B transactions', 'Micro-payments for agent services'],
 };

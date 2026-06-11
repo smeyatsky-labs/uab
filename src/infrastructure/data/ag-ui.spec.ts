@@ -52,6 +52,6 @@ export const agUiSpec: ProtocolSpec = {
   },
   defaultConfig: { transport: 'sse', heartbeatInterval: 30000, bufferSize: 100, enableSnapshots: true, enableDeltas: true, snapshotInterval: 60, supportedEvents: ['text-message-start', 'text-message-content', 'text-message-end', 'run-started', 'run-finished'] },
   exampleConfig: { transport: 'websocket', agentUrl: 'wss://agent.example.com/stream', heartbeatInterval: 15000, bufferSize: 500, enableSnapshots: true, enableDeltas: true, snapshotInterval: 30, supportedEvents: ['text-message-start', 'text-message-content', 'text-message-end', 'tool-call-start', 'state-snapshot', 'state-delta', 'run-started', 'run-finished'] },
-  capabilities: ['Bidirectional Events', 'State Synchronization', 'Tool Call Visibility', 'Progressive Streaming', 'Reconnection', 'Custom Events'],
+  protocolFeatures: ['Bidirectional Events', 'State Synchronization', 'Tool Call Visibility', 'Progressive Streaming', 'Reconnection', 'Custom Events'],
   useCases: ['Real-time chat interfaces', 'Agent monitoring dashboards', 'Collaborative editing', 'Live debugging tools'],
 };

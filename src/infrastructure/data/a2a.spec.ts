@@ -54,6 +54,6 @@ export const a2aSpec: ProtocolSpec = {
   },
   defaultConfig: { agentName: '', agentDescription: '', communicationPort: 8080, streaming: true, pushNotifications: false, authType: 'api-key', securityLevel: 'enhanced', maxConcurrentTasks: 5 },
   exampleConfig: { agentName: 'Commerce Assistant', agentDescription: 'Multi-vendor shopping agent with real-time price comparison', discoveryEndpoint: 'https://commerce-agent.example.com/.well-known/agent.json', communicationPort: 9090, streaming: true, pushNotifications: true, authType: 'oauth2', securityLevel: 'strict', maxConcurrentTasks: 20 },
-  capabilities: ['Agent Discovery', 'Agent Cards', 'Task Management', 'Multi-Agent Collaboration', 'Streaming Responses', 'Push Notifications'],
+  protocolFeatures: ['Agent Discovery', 'Agent Cards', 'Task Management', 'Multi-Agent Collaboration', 'Streaming Responses', 'Push Notifications'],
   useCases: ['Multi-agent orchestration', 'Agent marketplace discovery', 'Delegated task execution', 'Cross-organization collaboration'],
 };
