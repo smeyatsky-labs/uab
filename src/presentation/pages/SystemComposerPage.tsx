@@ -18,6 +18,7 @@ import { NeonButton } from '../components/ui/NeonButton.tsx';
 import { ProtocolSelector } from '../components/protocols/ProtocolSelector.tsx';
 import { ProtocolConfigurator } from '../components/protocols/ProtocolConfigurator.tsx';
 import { useProtocolRegistry } from '../hooks/useProtocolRegistry.ts';
+import { SyntheraProofPanel } from '../components/composer/SyntheraProofPanel.tsx';
 import type { ProtocolId } from '../../domain/protocols/protocol.types.ts';
 import {
   composerErrors,
@@ -363,6 +364,9 @@ export function SystemComposerPage() {
           )}
         </div>
       </div>
+
+      {/* Phase 4: the visible "SYNTHERA under everything" orthogonality proof. */}
+      <SyntheraProofPanel />
     </div>
   );
 }
