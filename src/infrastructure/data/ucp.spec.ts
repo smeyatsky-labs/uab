@@ -51,6 +51,6 @@ export const ucpSpec: ProtocolSpec = {
   },
   defaultConfig: { preferredRetailers: [], enableComparison: true, maxResults: 20, semanticSearch: true, currency: 'USD', surfaces: ['chat'], locale: 'en-US' },
   exampleConfig: { preferredRetailers: ['shopify', 'walmart'], enableComparison: true, maxResults: 50, semanticSearch: true, currency: 'USD', surfaces: ['chat', 'voice', 'visual'], locale: 'en-US' },
-  capabilities: ['Cross-Retailer Search', 'Price Comparison', 'Multi-Surface Shopping', 'Semantic Discovery', 'Order Fulfillment', 'AR Preview'],
+  protocolFeatures: ['Cross-Retailer Search', 'Price Comparison', 'Multi-Surface Shopping', 'Semantic Discovery', 'Order Fulfillment', 'AR Preview'],
   useCases: ['Personal shopping agents', 'B2B procurement', 'Multi-vendor comparison', 'Voice commerce'],
 };

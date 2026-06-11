@@ -103,7 +103,14 @@ export interface ProtocolSpec {
   readonly compatibility: ProtocolCompatibility;
   readonly defaultConfig: Record<string, unknown>;
   readonly exampleConfig: Record<string, unknown>;
-  readonly capabilities: readonly string[];
+  /**
+   * What this protocol can DO (descriptive feature list, e.g. "Tool Invocation").
+   * NOT the governed capabilitySet. Renamed from `capabilities` (LEAK-2 wall-off):
+   * the word "capabilities" must never name a non-governed surface that could be
+   * mistaken for, or sourced into, the governance capabilitySet. Protocol features
+   * are opaque runtime descriptors; they never confer authority.
+   */
+  readonly protocolFeatures: readonly string[];
   readonly useCases: readonly string[];
 }
 

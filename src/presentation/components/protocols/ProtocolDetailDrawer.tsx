@@ -54,9 +54,9 @@ export function ProtocolDetailDrawer({ protocolId, onClose }: ProtocolDetailDraw
               <p className="mb-6 text-sm text-gray-300 leading-relaxed">{spec.metadata.description}</p>
 
               <section className="mb-6">
-                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Capabilities</h3>
+                <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-gray-500">Protocol features</h3>
                 <div className="flex flex-wrap gap-1.5">
-                  {spec.capabilities.map(cap => (
+                  {spec.protocolFeatures.map(cap => (
                     <span key={cap} className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs text-gray-300">
                       {cap}
                     </span>

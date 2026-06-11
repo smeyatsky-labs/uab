@@ -56,6 +56,6 @@ export const mcpSpec: ProtocolSpec = {
   },
   defaultConfig: { transport: 'stdio', enableTools: true, enableResources: true, enablePrompts: true, enableSampling: false, contextWindow: 128000, maxToolCalls: 10, timeoutMs: 30000 },
   exampleConfig: { transport: 'streamable-http', serverUrl: 'https://mcp.example.com/v1', enableTools: true, enableResources: true, enablePrompts: true, enableSampling: true, contextWindow: 200000, maxToolCalls: 25, timeoutMs: 60000 },
-  capabilities: ['Tool Invocation', 'Resource Access', 'Prompt Templates', 'LLM Sampling', 'Server Discovery', 'Capability Negotiation'],
+  protocolFeatures: ['Tool Invocation', 'Resource Access', 'Prompt Templates', 'LLM Sampling', 'Server Discovery', 'Capability Negotiation'],
   useCases: ['Connect AI to databases', 'File system access', 'API integration', 'Code execution', 'Knowledge base queries'],
 };

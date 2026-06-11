@@ -45,6 +45,6 @@ export const acpSpec: ProtocolSpec = {
   },
   defaultConfig: { merchantName: '', currencies: ['USD'], instantCheckout: true, requireConfirmation: true, maxTransactionAmount: 500, sandboxMode: true },
   exampleConfig: { merchantName: 'TechMart AI', catalogEndpoint: 'https://api.techmart.com/v2/catalog', currencies: ['USD', 'EUR'], instantCheckout: true, requireConfirmation: false, maxTransactionAmount: 5000, sandboxMode: false },
-  capabilities: ['Instant Checkout', 'Product Discovery', 'Cart Management', 'Order Tracking', 'Refund Processing', 'Multi-Currency'],
+  protocolFeatures: ['Instant Checkout', 'Product Discovery', 'Cart Management', 'Order Tracking', 'Refund Processing', 'Multi-Currency'],
   useCases: ['AI shopping assistants', 'Automated procurement', 'Subscription management', 'Price comparison agents'],
 };

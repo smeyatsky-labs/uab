@@ -52,6 +52,6 @@ export const adkSpec: ProtocolSpec = {
   },
   defaultConfig: { workflowType: 'sequential', maxParallelism: 4, loggingLevel: 'info', environment: 'local', maxMemoryMB: 512, maxExecutionTimeMs: 60000, maxTokensPerStep: 4096 },
   exampleConfig: { workflowType: 'dag', maxParallelism: 16, loggingLevel: 'debug', environment: 'cloud', callbackUrl: 'https://api.example.com/webhooks/workflow', maxMemoryMB: 4096, maxExecutionTimeMs: 300000, maxTokensPerStep: 32000 },
-  capabilities: ['Sequential Workflows', 'Parallel Execution', 'Loop Patterns', 'DAG Orchestration', 'Resource Management', 'Lifecycle Hooks'],
+  protocolFeatures: ['Sequential Workflows', 'Parallel Execution', 'Loop Patterns', 'DAG Orchestration', 'Resource Management', 'Lifecycle Hooks'],
   useCases: ['Multi-step data pipelines', 'Parallel research tasks', 'Iterative refinement loops', 'Complex agent orchestration'],
 };
