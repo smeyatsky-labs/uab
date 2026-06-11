@@ -66,6 +66,7 @@ describe('LEAK-2 — protocol features are inert; "capabilities" is not a protoc
     const restricted: ComposerRole = {
       ref: 'root', role: 'supervisor', name: 'Supervisor', prompt: '',
       scopeBoundary: ['demo-tenant/root/'], capabilitySet: ['read.documents'], root: true,
+      protocolConfig: {},
     };
     const state = {
       systemName: 'Sys', tenantId: 'demo-tenant', roles: [restricted],

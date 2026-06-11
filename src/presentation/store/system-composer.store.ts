@@ -31,6 +31,14 @@ export interface ComposerRole {
   scopeBoundary: string[];
   capabilitySet: string[];
   root: boolean;
+  /**
+   * The protocols this role speaks, keyed by protocolId — each value a config
+   * map ({ version, ...config }). This is the PRIMARY per-role builder surface.
+   * It is OPAQUE to governance: it flows only into GovernedSystemSpec.protocolConfig
+   * and the deployed agent's runtime. It is NEVER a source of scope/capability/
+   * identity. Selecting a protocol adds a key here; it changes no governed field.
+   */
+  protocolConfig: Record<string, Record<string, unknown>>;
 }
 
 export type ProvisionStatus = 'idle' | 'validating' | 'provisioning' | 'done' | 'error';
@@ -55,6 +63,10 @@ interface ComposerState {
   setRoot: (ref: string) => void;
   addDelegation: (parent: string, child: string) => void;
   removeDelegation: (parent: string, child: string) => void;
+  /** Toggle a protocol on a role. `seed` is the initial config when adding. Opaque to governance. */
+  toggleRoleProtocol: (ref: string, protocolId: string, seed: Record<string, unknown>) => void;
+  /** Update one protocol's config map on a role. Opaque to governance. */
+  setRoleProtocolConfig: (ref: string, protocolId: string, config: Record<string, unknown>) => void;
   setStatus: (s: ProvisionStatus, payload?: { result?: unknown; error?: string }) => void;
   reset: () => void;
 }
@@ -74,6 +86,7 @@ function seedRoles(tenantId: string): ComposerRole[] {
       scopeBoundary: templateScope(tenantId, 'root'),
       capabilitySet: ['read.documents', 'spawn.workers'],
       root: true,
+      protocolConfig: {},
     },
   ];
 }
@@ -102,6 +115,7 @@ export const useComposerStore = create<ComposerState>()(
         scopeBoundary: templateScope(s.tenantId, ref),
         capabilitySet: ['read.documents'],
         root: false,
+        protocolConfig: {},
       });
     }),
 
@@ -131,6 +145,21 @@ export const useComposerStore = create<ComposerState>()(
       s.delegations = s.delegations.filter((d) => !(d.parent === parent && d.child === child));
     }),
 
+    // Protocols are opaque to governance: these actions touch ONLY protocolConfig.
+    // They never read or write scopeBoundary / capabilitySet / root / delegations.
+    toggleRoleProtocol: (ref, protocolId, seed) => set((s) => {
+      const r = s.roles.find((x) => x.ref === ref);
+      if (!r) return;
+      if (protocolId in r.protocolConfig) delete r.protocolConfig[protocolId];
+      else r.protocolConfig[protocolId] = { ...seed };
+    }),
+
+    setRoleProtocolConfig: (ref, protocolId, config) => set((s) => {
+      const r = s.roles.find((x) => x.ref === ref);
+      if (!r) return;
+      r.protocolConfig[protocolId] = config;
+    }),
+
     setStatus: (status, payload) => set((s) => {
       s.status = status;
       if (payload?.result !== undefined) s.result = payload.result;
@@ -158,6 +187,9 @@ export function composerToSpec(state: ComposerState): GovernedSystemSpec {
     scopeBoundary: r.scopeBoundary,
     capabilitySet: r.capabilitySet,
     root: r.root,
+    // Opaque pass-through (M4). The engine/substrate never read this; it rides
+    // to the deployed agent's runtime. It is NOT a source of any governed field.
+    protocolConfig: r.protocolConfig,
   }));
   return {
     specVersion: SPEC_VERSION,
