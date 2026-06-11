@@ -12,9 +12,13 @@
  */
 
 import { useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Plus, Rocket, Shield, Trash2, Workflow } from 'lucide-react';
+import { AlertTriangle, Boxes, CheckCircle2, Plus, Rocket, Shield, Trash2, Workflow } from 'lucide-react';
 import { GlassPanel } from '../components/ui/GlassPanel.tsx';
 import { NeonButton } from '../components/ui/NeonButton.tsx';
+import { ProtocolSelector } from '../components/protocols/ProtocolSelector.tsx';
+import { ProtocolConfigurator } from '../components/protocols/ProtocolConfigurator.tsx';
+import { useProtocolRegistry } from '../hooks/useProtocolRegistry.ts';
+import type { ProtocolId } from '../../domain/protocols/protocol.types.ts';
 import {
   composerErrors,
   composerToSpec,
@@ -23,10 +27,71 @@ import {
 } from '../store/system-composer.store.ts';
 import { provisionSystem } from '../../infrastructure/adapters/forge-provisioning-builder.service.ts';
 
+/**
+ * The per-role protocol surface — the PRIMARY, dominant builder choice (D-D=A).
+ * Selection lives in the role's opaque protocolConfig; toggling/configuring a
+ * protocol touches NO governed field. SYNTHERA is not in this catalog; it is the
+ * substrate underneath whatever is chosen here.
+ */
+function RoleProtocols({ role }: { role: ComposerRole }) {
+  const { getById } = useProtocolRegistry();
+  const toggleRoleProtocol = useComposerStore((s) => s.toggleRoleProtocol);
+  const setRoleProtocolConfig = useComposerStore((s) => s.setRoleProtocolConfig);
+  const selected = Object.keys(role.protocolConfig) as ProtocolId[];
+
+  const onToggle = (id: ProtocolId) => {
+    const spec = getById(id);
+    // Seed with the protocol's own version + defaults — pure runtime detail.
+    const seed = { version: spec?.metadata.version ?? '0.0.0', ...(spec?.defaultConfig ?? {}) };
+    toggleRoleProtocol(role.ref, id, seed);
+  };
+
+  return (
+    <div className="space-y-3 rounded-lg border border-secondary/20 bg-secondary/[0.03] p-3">
+      <div className="flex items-center gap-2 text-xs font-semibold text-gray-100">
+        <Boxes size={14} className="text-secondary" /> Protocols — what this role speaks
+        <span className="ml-auto font-mono text-[10px] text-gray-500">{selected.length} selected</span>
+      </div>
+      <ProtocolSelector selected={selected} onToggle={onToggle} />
+      {selected.length > 0 && (
+        <div className="space-y-2 pt-1">
+          {selected.map((id) => (
+            <ProtocolConfigurator
+              key={id}
+              protocolId={id}
+              config={role.protocolConfig[id]}
+              onChange={(cfg) => setRoleProtocolConfig(role.ref, id, cfg)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Read-only derived governance chips (D-A=C): bounds shown, not homework. */
+function ChipRow({ label, values, mono }: { label: string; values: string[]; mono?: boolean }) {
+  return (
+    <div className="flex items-start gap-2">
+      <span className="w-12 shrink-0 text-[10px] uppercase tracking-wider text-gray-600">{label}</span>
+      <div className="flex flex-wrap gap-1">
+        {values.length === 0 ? (
+          <span className="text-[10px] text-gray-600">— none —</span>
+        ) : values.map((v) => (
+          <span key={v} className={`rounded-full border border-white/10 bg-white/[0.03] px-2 py-0.5 text-[10px] text-gray-400${mono ? ' font-mono' : ''}`}>
+            {v}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function RoleCard({ role, allRoles }: { role: ComposerRole; allRoles: ComposerRole[] }) {
   const { updateRole, removeRole, setRoot, addDelegation, removeDelegation } = useComposerStore();
   const delegations = useComposerStore((s) => s.delegations);
   const parentEdge = delegations.find((d) => d.child === role.ref);
+  const [customizing, setCustomizing] = useState(false);
 
   return (
     <GlassPanel className="space-y-3">
@@ -75,27 +140,55 @@ function RoleCard({ role, allRoles }: { role: ComposerRole; allRoles: ComposerRo
         </label>
       </div>
 
-      <label className="block space-y-1 text-xs">
-        <span className="text-gray-500">Scope boundary (resource prefix only — no action verbs)</span>
-        <input
-          className="w-full rounded bg-white/5 px-2 py-1 font-mono"
-          value={role.scopeBoundary.join(', ')}
-          onChange={(e) => updateRole(role.ref, {
-            scopeBoundary: e.target.value.split(',').map((x) => x.trim()).filter(Boolean),
-          })}
-        />
-      </label>
+      {/* GOVERNANCE — derived bounds, shown not filled (D-A=C). Quiet status next
+          to the dominant protocol surface. Identity/PoP/attenuation are ambient
+          (never shown as fields); only the authored bounds appear, as chips. */}
+      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-gray-500">
+            <Shield size={11} className="text-primary" /> Governance — derived, enforced by SYNTHERA
+          </span>
+          <button
+            className="text-[10px] text-gray-500 hover:text-primary"
+            onClick={() => setCustomizing((v) => !v)}
+          >
+            {customizing ? 'done' : 'customize'}
+          </button>
+        </div>
 
-      <label className="block space-y-1 text-xs">
-        <span className="text-gray-500">Capabilities</span>
-        <input
-          className="w-full rounded bg-white/5 px-2 py-1 font-mono"
-          value={role.capabilitySet.join(', ')}
-          onChange={(e) => updateRole(role.ref, {
-            capabilitySet: e.target.value.split(',').map((x) => x.trim()).filter(Boolean),
-          })}
-        />
-      </label>
+        {!customizing ? (
+          <div className="mt-2 space-y-1.5">
+            <ChipRow label="scope" values={role.scopeBoundary} mono />
+            <ChipRow label="caps" values={role.capabilitySet} />
+          </div>
+        ) : (
+          <div className="mt-2 space-y-2">
+            <label className="block space-y-1 text-xs">
+              <span className="text-gray-500">Scope boundary (resource prefix only — no action verbs)</span>
+              <input
+                className="w-full rounded bg-white/5 px-2 py-1 font-mono"
+                value={role.scopeBoundary.join(', ')}
+                onChange={(e) => updateRole(role.ref, {
+                  scopeBoundary: e.target.value.split(',').map((x) => x.trim()).filter(Boolean),
+                })}
+              />
+            </label>
+            <label className="block space-y-1 text-xs">
+              <span className="text-gray-500">Capabilities</span>
+              <input
+                className="w-full rounded bg-white/5 px-2 py-1 font-mono"
+                value={role.capabilitySet.join(', ')}
+                onChange={(e) => updateRole(role.ref, {
+                  capabilitySet: e.target.value.split(',').map((x) => x.trim()).filter(Boolean),
+                })}
+              />
+            </label>
+          </div>
+        )}
+      </div>
+
+      {/* PROTOCOLS — the primary per-role surface (D-D=A). */}
+      <RoleProtocols role={role} />
     </GlassPanel>
   );
 }

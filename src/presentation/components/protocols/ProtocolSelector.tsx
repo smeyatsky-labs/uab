@@ -2,11 +2,14 @@ import { motion } from 'framer-motion';
 import { clsx } from 'clsx';
 import { Check } from 'lucide-react';
 import { useProtocolRegistry } from '../../hooks/useProtocolRegistry.ts';
-import { useAppStore } from '../../store/app-store.ts';
 import { ProtocolIcon } from '../ui/ProtocolIcon.tsx';
 import type { ProtocolId } from '../../../domain/protocols/protocol.types.ts';
 
 interface ProtocolSelectorProps {
+  /** Currently-selected protocol ids (governance-agnostic). */
+  selected: ProtocolId[];
+  /** Toggle a protocol. The caller decides where the selection lives. */
+  onToggle: (id: ProtocolId) => void;
   recommendations?: { protocolId: ProtocolId; confidence: number; reason: string }[];
 }
 
@@ -19,10 +22,8 @@ const categoryLabels: Record<string, string> = {
   'orchestration': 'Orchestration',
 };
 
-export function ProtocolSelector({ recommendations = [] }: ProtocolSelectorProps) {
+export function ProtocolSelector({ selected, onToggle, recommendations = [] }: ProtocolSelectorProps) {
   const { allProtocols } = useProtocolRegistry();
-  const { selectedProtocols } = useAppStore(s => s.builder);
-  const toggleProtocol = useAppStore(s => s.toggleProtocol);
 
   const recMap = new Map(recommendations.map(r => [r.protocolId, r]));
 
@@ -42,18 +43,18 @@ export function ProtocolSelector({ recommendations = [] }: ProtocolSelectorProps
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {protocols.map((spec) => {
-              const selected = selectedProtocols.includes(spec.metadata.id);
+              const isSelected = selected.includes(spec.metadata.id);
               const rec = recMap.get(spec.metadata.id);
 
               return (
                 <motion.button
                   key={spec.metadata.id}
-                  onClick={() => toggleProtocol(spec.metadata.id)}
+                  onClick={() => onToggle(spec.metadata.id)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className={clsx(
                     'relative flex items-start gap-3 rounded-lg border p-3 text-left transition-all',
-                    selected
+                    isSelected
                       ? 'border-primary/50 bg-primary/10'
                       : 'border-white/10 bg-white/[0.02] hover:border-white/20',
                   )}
@@ -76,7 +77,7 @@ export function ProtocolSelector({ recommendations = [] }: ProtocolSelectorProps
                       </span>
                     )}
                   </div>
-                  {selected && (
+                  {isSelected && (
                     <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-background">
                       <Check size={12} />
                     </div>

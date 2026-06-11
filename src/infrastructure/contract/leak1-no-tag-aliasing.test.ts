@@ -29,6 +29,7 @@ function role(over: Partial<ComposerRole>): ComposerRole {
     scopeBoundary: ['demo-tenant/root/'],
     capabilitySet: [],
     root: true,
+    protocolConfig: {},
     ...over,
   };
 }

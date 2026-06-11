@@ -1,6 +1,5 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback } from 'react';
 import { useProtocolRegistry } from '../../hooks/useProtocolRegistry.ts';
-import { useAppStore } from '../../store/app-store.ts';
 import { ProtocolIcon } from '../ui/ProtocolIcon.tsx';
 import { GlassPanel } from '../ui/GlassPanel.tsx';
 import type { ProtocolId, ConfigField } from '../../../domain/protocols/protocol.types.ts';
@@ -8,25 +7,22 @@ import { clsx } from 'clsx';
 
 interface ProtocolConfiguratorProps {
   protocolId: ProtocolId;
+  /** This protocol's current config map (governance-agnostic). */
+  config: Record<string, unknown>;
+  /** Persist an updated config map. The caller decides where it lives. */
+  onChange: (config: Record<string, unknown>) => void;
 }
 
-export function ProtocolConfigurator({ protocolId }: ProtocolConfiguratorProps) {
+export function ProtocolConfigurator({ protocolId, config, onChange }: ProtocolConfiguratorProps) {
   const { getById, getConfigSchema } = useProtocolRegistry();
   const spec = getById(protocolId);
   const schema = getConfigSchema(protocolId);
-  const protocolConfigs = useAppStore(s => s.builder.protocolConfigs);
-  const setProtocolConfig = useAppStore(s => s.setProtocolConfig);
-
-  const config = useMemo(
-    () => protocolConfigs[protocolId] ?? spec?.defaultConfig ?? {},
-    [protocolConfigs, protocolId, spec?.defaultConfig],
-  );
 
   const updateField = useCallback(
     (key: string, value: unknown) => {
-      setProtocolConfig(protocolId, { ...config, [key]: value });
+      onChange({ ...config, [key]: value });
     },
-    [protocolId, config, setProtocolConfig],
+    [config, onChange],
   );
 
   if (!spec || !schema) return null;
